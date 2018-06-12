@@ -18,7 +18,12 @@ class TasksController extends Controller
         $tasks =Task::all();
         return view('tasks.index',[
             'tasks' =>$tasks,
-            ]);
+        ]);
+        
+        
+        $tasks = Task::where('user_id', '', \Auth::user()->id)->paginate(10);
+        
+        
     }
 
     /**
@@ -51,6 +56,7 @@ class TasksController extends Controller
         $task=new Task;
         $task->status = $request->status;
         $task->content = $request->content;
+        $task->user_id = \Auth::user()->id;
         $task->save();
         
         return redirect('/');
@@ -64,10 +70,23 @@ class TasksController extends Controller
      */
     public function show($id)
     {
-        $task=Task::find($id);
-        return view('tasks.show',[
-            'task'=>$task,
-            ]);
+        
+        if (\Auth::check()) {
+            $task=Task::find($id);
+            if ($task->user_id == \Auth::user()->id) {
+                
+                return view('tasks.show',[
+                    'task'=>$task,
+                ]);
+            } else {
+                return redirect('/');
+            }
+            
+             } else {
+                return redirect('/');
+             }
+        
+        
     }
 
     /**
@@ -78,11 +97,22 @@ class TasksController extends Controller
      */
     public function edit($id)
     {
-        $task=Task::find($id);
         
-        return view('tasks.edit',[
-            'task'=>$task,
-            ]);
+         if (\Auth::check()) {
+            $task=Task::find($id);
+            if ($task->user_id == \Auth::user()->id) {
+                
+                return view('tasks.edit',[
+                    'task'=>$task,
+                ]);
+            } else {
+                return redirect('/');
+            }
+            
+             } else {
+                return redirect('/');
+             }
+       
     }
 
     /**
@@ -115,9 +145,21 @@ class TasksController extends Controller
      */
     public function destroy($id)
     {
-        $task=Task::find($id);
-        $task->delete();
         
-        return redirect('/');
+         if (\Auth::check()) {
+            $task=Task::find($id);
+            if ($task->user_id == \Auth::user()->id) {
+                
+                return view('tasks.delete',[
+                    'task'=>$task,
+                ]);
+            } else {
+                return redirect('/');
+            }
+            
+             } else {
+                return redirect('/');
+             }
+      
     }
 }
